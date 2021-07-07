@@ -53,7 +53,7 @@ client.connect(err => {
     app.get('/allBlogs', (req, res) => {
         blogsCollection.find()
             .toArray((err, items) => {
-                console.log(items)
+                // console.log(items)
                 res.send(items)
             });
     });
@@ -79,7 +79,7 @@ client.connect(err => {
     app.get('/comments', (req, res) => {
         commentsCollection.find()
             .toArray((err, items) => {
-                console.log(items)
+                // console.log(items)
                 res.send(items)
             });
     });
@@ -87,10 +87,19 @@ client.connect(err => {
     app.delete('/deleteComment/:id', (req, res) => {
         commentsCollection.deleteOne({ _id: ObjectId(req.params.id) })
             .then(result => {
-                console.log(result)
+                // console.log(result)
                 res.send('success')
             })
             .catch(err => res.send('failed'))
+    });
+
+    app.delete('/deletePostComment/:id', (req, res) => {
+        commentsCollection.deleteMany({ blogId: req.params.id })
+            .then(result => {
+                // console.log(result)
+                res.send('success')
+            })
+            .catch((err) => res.send('failed'))
     });
 
     // reply-related-code
@@ -98,7 +107,7 @@ client.connect(err => {
         const newReply = req.body;
         repliesCollection.insertOne(newReply)
             .then(result => {
-                console.log(result)
+                // console.log(result)
                 res.send(result.insertedCount > 0)
             });
     });
@@ -106,10 +115,37 @@ client.connect(err => {
     app.get('/allReplies', (req, res) => {
         repliesCollection.find()
             .toArray((err, items) => {
-                console.log(items)
+                // console.log(items)
                 res.send(items)
+            });
+    });
+
+    app.delete('/deleteReply/:id', (req, res) => {
+        repliesCollection.deleteOne({ _id: ObjectId(req.params.id) })
+            .then(result => {
+                // console.log(result)
+                res.send('success')
             })
-    })
+            .catch((err) => res.send('failed'))
+    });
+
+    app.delete('/deleteCommentWithReplies/:id', (req, res) => {
+        repliesCollection.deleteMany({ commentId: req.params.id })
+            .then(result => {
+                console.log(result)
+                res.send('success')
+            })
+            .catch((err) => res.send('failed'))
+    });
+
+    app.delete('/deletePostCommentReply/:id', (req, res) => {
+        repliesCollection.deleteMany({ commentId: req.params.id })
+            .then(result => {
+                // console.log(result)
+                res.send('success')
+            })
+            .catch((err) => res.send('failed'))
+    });
 
     app.get('/', (req, res) => {
         res.send('Catching golden deer!')
