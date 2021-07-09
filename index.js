@@ -16,9 +16,27 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
     console.log('err', err)
+    const adminsCollection = client.db("retroBlogs").collection("admin");
     const blogsCollection = client.db("retroBlogs").collection("blogs");
     const commentsCollection = client.db("retroBlogs").collection("comments");
     const repliesCollection = client.db("retroBlogs").collection("replies");
+
+    //admin related code
+    app.post('/makeAdmin', (req, res) => {
+        const newAdmin = req.body;
+        adminsCollection.insertOne(newAdmin)
+            .then(result => {
+                res.send(result.insertedCount > 0)
+            });
+    });
+
+    app.post('/isAdmin', (req, res) => {
+        const email = req.body.email;
+        adminsCollection.find({ email: email })
+            .toArray((err, admins) => {
+                res.send(admins.length > 0)
+            });
+    });
 
     // blogs related code
     app.post('/postBlog', (req, res) => {
@@ -47,14 +65,6 @@ client.connect(err => {
         blogsCollection.find({ _id: ObjectId(req.params.id) })
             .toArray((err, documents) => {
                 res.send(documents);
-            });
-    });
-
-    app.get('/allBlogs', (req, res) => {
-        blogsCollection.find()
-            .toArray((err, items) => {
-                // console.log(items)
-                res.send(items)
             });
     });
 
