@@ -47,16 +47,18 @@ client.connect(err => {
             });
     });
 
-    app.get('/allBlogs', (req, res) => {
+    app.get('/blogs', (req, res) => {
         blogsCollection.find({})
             .toArray((err, items) => {
                 res.send(items)
             });
     });
 
-    app.get('/blogs', (req, res) => {
-        blogsCollection.find({ topic: req.query.topic })
+    app.get('/searchBlogs', (req, res) => {
+        const search = req.query.search;
+        blogsCollection.find({ title: { $regex: search } })
             .toArray((err, items) => {
+                console.log(items)
                 res.send(items)
             });
     });
