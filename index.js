@@ -1,25 +1,23 @@
 const express = require('express');
 const app = express();
 const ObjectId = require('mongodb').ObjectID;
-const MongoClient = require('mongodb').MongoClient;
+const { MongoClient } = require('mongodb');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const port = 5000
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.pnj3g.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mtqgx.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
     console.log('err', err)
-    const adminsCollection = client.db("retroBlogs").collection("admin");
-    const blogsCollection = client.db("retroBlogs").collection("blogs");
-    const commentsCollection = client.db("retroBlogs").collection("comments");
-    const repliesCollection = client.db("retroBlogs").collection("replies");
+    const adminsCollection = client.db("pad-blogs").collection("admin");
+    const blogsCollection = client.db("pad-blogs").collection("blogs");
+    const commentsCollection = client.db("pad-blogs").collection("comments");
+    const repliesCollection = client.db("pad-blogs").collection("replies");
 
     //admin related code
     app.post('/makeAdmin', (req, res) => {
@@ -43,6 +41,7 @@ client.connect(err => {
         const newBlog = req.body;
         blogsCollection.insertOne(newBlog)
             .then(result => {
+                console.log(result);
                 res.send(result.insertedCount > 0);
             });
     });
@@ -50,13 +49,14 @@ client.connect(err => {
     app.get('/blogs', (req, res) => {
         blogsCollection.find({})
             .toArray((err, items) => {
+                console.log(items);
                 res.send(items)
             });
     });
 
     app.get('/searchBlogs', (req, res) => {
         const search = req.query.search;
-        blogsCollection.find({ title: { $regex: search } })
+        blogsCollection.find({ title: { $regex: search, $option: 'i' } })
             .toArray((err, items) => {
                 console.log(items)
                 res.send(items)
@@ -160,9 +160,10 @@ client.connect(err => {
     });
 
     app.get('/', (req, res) => {
-        res.send('Catching golden deer!')
+        res.send('pad blogs!')
     })
 
 });
 
 app.listen(process.env.PORT || port)
+
