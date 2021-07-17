@@ -36,6 +36,13 @@ client.connect(err => {
             });
     });
 
+    app.get('/admins', (req, res) => {
+        adminsCollection.find({})
+            .toArray((err, items) => {
+                res.send(items)
+            });
+    });
+
     // blogs related code
     app.post('/postBlog', (req, res) => {
         const newBlog = req.body;
@@ -49,14 +56,14 @@ client.connect(err => {
     app.get('/blogs', (req, res) => {
         blogsCollection.find({})
             .toArray((err, items) => {
-                console.log(items);
+                // console.log(items);
                 res.send(items)
             });
     });
 
     app.get('/searchBlogs', (req, res) => {
         const search = req.query.search;
-        blogsCollection.find({ title: { $regex: search, $option: 'i' } })
+        blogsCollection.find({ title: { $regex: new RegExp(search, 'i') } })
             .toArray((err, items) => {
                 console.log(items)
                 res.send(items)
